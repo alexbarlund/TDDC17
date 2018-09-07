@@ -234,29 +234,105 @@ class MyAgentProgram implements AgentProgram {
 					state.agent_last_action=state.ACTION_TURN_LEFT;
 					return LIUVacuumEnvironment.ACTION_TURN_LEFT;
 				}*/
-			
+
 				int[] next = {0,0,0,0};
 				next[0] = state.world[state.agent_x_position][state.agent_y_position-1];
 				next[1] = state.world[state.agent_x_position+1][state.agent_y_position];
 				next[2] = state.world[state.agent_x_position][state.agent_y_position+1];
 				next[3] = state.world[state.agent_x_position-1][state.agent_y_position];
-				
+
 				boolean containsUnknown = false;
 				for(int i=0;i<4;i++){
 					if (next[i] == state.UNKNOWN) 
 						containsUnknown = true;
 				}
-				
-				if (next[state.agent_direction] == state.UNKNOWN){
+				if (next[state.WEST]==state.UNKNOWN){
+					if (state.agent_direction == state.WEST){
+						state.agent_last_action=state.ACTION_MOVE_FORWARD;
+						return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
+					}
+					// TODO implement turn right if dir < than something shortest turn dir
+					else{
+						if (state.agent_direction > state.NORTH){
+							state.agent_direction = ((state.agent_direction+1) % 4);
+							state.agent_last_action=state.ACTION_TURN_RIGHT;
+							return LIUVacuumEnvironment.ACTION_TURN_RIGHT;
+						}
+						else{
+							state.agent_direction = ((state.agent_direction-1) % 4);
+							if (state.agent_direction<0) 
+								state.agent_direction +=4;
+							state.agent_last_action=state.ACTION_TURN_LEFT;
+							return LIUVacuumEnvironment.ACTION_TURN_LEFT;
+						}
+					}
+				}
+				else if (next[state.SOUTH]==state.UNKNOWN){
+					if (state.agent_direction == state.SOUTH){
+						state.agent_last_action=state.ACTION_MOVE_FORWARD;
+						return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
+					}
+					// TODO implement turn right if dir < than something shortest turn dir
+					else{
+						if (state.agent_direction>state.SOUTH){
+							state.agent_direction = ((state.agent_direction-1) % 4);
+							if (state.agent_direction<0) 
+								state.agent_direction +=4;
+							state.agent_last_action=state.ACTION_TURN_LEFT;
+							return LIUVacuumEnvironment.ACTION_TURN_LEFT;
+						}
+						else{
+							state.agent_direction = ((state.agent_direction+1) % 4);
+							state.agent_last_action=state.ACTION_TURN_RIGHT;
+							return LIUVacuumEnvironment.ACTION_TURN_RIGHT;
+						}
+					}
+				}
+				else if (next[state.NORTH]==state.UNKNOWN){
+					if (state.agent_direction == state.NORTH){
+						state.agent_last_action=state.ACTION_MOVE_FORWARD;
+						return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
+					}
+					// TODO implement turn right if dir < than something shortest turn dir
+					else{
+						state.agent_direction = ((state.agent_direction-1) % 4);
+						if (state.agent_direction<0) 
+							state.agent_direction +=4;
+						state.agent_last_action=state.ACTION_TURN_LEFT;
+						return LIUVacuumEnvironment.ACTION_TURN_LEFT;
+					}
+				}
+				else if (next[state.EAST]==state.UNKNOWN){
+					if (state.agent_direction == state.EAST){
+						state.agent_last_action=state.ACTION_MOVE_FORWARD;
+						return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
+					}
+					// TODO implement turn right if dir < than something shortest turn dir
+					else{
+						if(state.agent_direction <state.EAST){
+							state.agent_direction = ((state.agent_direction+1) % 4);
+							state.agent_last_action=state.ACTION_TURN_RIGHT;
+							return LIUVacuumEnvironment.ACTION_TURN_RIGHT;
+						}
+						else{
+							state.agent_direction = ((state.agent_direction-1) % 4);
+							if (state.agent_direction<0) 
+								state.agent_direction +=4;
+							state.agent_last_action=state.ACTION_TURN_LEFT;
+							return LIUVacuumEnvironment.ACTION_TURN_LEFT;
+						}
+					}
+				}
+				else if (next[state.agent_direction] == state.UNKNOWN){
 					state.agent_last_action=state.ACTION_MOVE_FORWARD;
 					return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
 				}
 				else if (containsUnknown){
-					state.agent_direction = ((state.agent_direction-1) % 4);
+					state.agent_direction = ((state.agent_direction+1) % 4);
 					if (state.agent_direction<0) 
 						state.agent_direction +=4;
-					state.agent_last_action=state.ACTION_TURN_LEFT;
-					return LIUVacuumEnvironment.ACTION_TURN_LEFT;
+					state.agent_last_action=state.ACTION_TURN_RIGHT;
+					return LIUVacuumEnvironment.ACTION_TURN_RIGHT;
 				}
 				else if(next[state.agent_direction] == state.WALL){
 					state.agent_direction = ((state.agent_direction-1) % 4);
@@ -271,7 +347,7 @@ class MyAgentProgram implements AgentProgram {
 					return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
 				}
 
-				
+
 			}
 		}
 	}
