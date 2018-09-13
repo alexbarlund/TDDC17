@@ -126,6 +126,40 @@ class MyAgentProgram implements AgentProgram {
 		return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
 	}
 
+	//determines whether the map is cleared, i.e if it is time to stop at Home
+	public boolean clearedmap()
+	{
+		//20 maximum size
+		//Find wall on x-axis, assume quadratic playing field, easy to search y as well if not
+		int index = 20;
+		for(int y = 1; y <= 4; y++)
+		{
+			for(int x = 1; x <= 21;x++)
+			{
+				if(state.world[x][y] == state.WALL)
+				{	
+					index = x;
+					break;
+				}
+			}	
+		}
+
+		//within the now known size of playing field, search if there's unknown left
+		boolean returnhome = true;
+		for (int i=1; i < index-1; i++)
+		{
+			for (int j=1; j < index-1 ; j++)
+			{
+				if (state.world[i][j]== state.UNKNOWN)
+				{
+					returnhome = false;
+				}
+			}
+		}
+		return returnhome;
+
+	}
+
 
 	@Override
 	public Action execute(Percept percept) {
@@ -187,55 +221,11 @@ class MyAgentProgram implements AgentProgram {
 			state.updateWorld(state.agent_x_position,state.agent_y_position,state.CLEAR);
 
 		state.printWorldDebug();
-		
-		//20 maximum size
-		/*int index = 20;
-		for(int y = 1; y <= 4; y++)
-		{
-			for(int x = 1; x <= 21;x++)
-			{
-				if(state.world[x][y] == state.WALL)
-				{	
-					index = x;
-					break;
-				}
-			}	
-		}*/
-		
-		
-		boolean returnhome = false;	//true
-		/*for (int i=1; i < index-1; i++)
-		{
-			for (int j=1; j < index-1 ; j++)
-			{
-				if (state.world[i][j]== state.UNKNOWN)
-				{
-					returnhome = false;
-				}
-			}
-		}*/
-		System.out.println("return home" + returnhome);
-		/*boolean wallx = false;
-		int x = 0;
-		while(!wallx AND x < 30)
-		{
-			if(state.world[1+x][2] == state.WALL)
-				wallx = true;
-			else
-				x++;
-		}
-		
-		boolean wally = false;
-		int y = 0;
-		while(!wally AND x < 30)
-		{
-			if(state.world[1+y][2] == state.WALL)
-				wally = true;
-			else
-				y++;
-		}*/
-		
-		
+
+
+		boolean returnhome = false;
+		//Comment out when running w/ obstacles
+		returnhome = clearedmap();
 
 
 		// Next action selection based on the percept value
@@ -245,124 +235,41 @@ class MyAgentProgram implements AgentProgram {
 			state.agent_last_action=state.ACTION_SUCK;
 			return LIUVacuumEnvironment.ACTION_SUCK;
 		} 
+		else if(home && returnhome)//If we are standing on home and the map is cleared, stop
+		{	
+			state.agent_last_action=state.ACTION_NONE;
+			return NoOpAction.NO_OP;
+		}
 		else
 		{
-			if (bump)
+
+			//the state of position north, south, west and east of our position
+			int[] next = {0,0,0,0};
+			next[0] = state.world[state.agent_x_position][state.agent_y_position-1];
+			next[1] = state.world[state.agent_x_position+1][state.agent_y_position];
+			next[2] = state.world[state.agent_x_position][state.agent_y_position+1];
+			next[3] = state.world[state.agent_x_position-1][state.agent_y_position];
+
+			//Search if any of above neighbours is unknown
+			boolean containsUnknown = false;
+			for(int i=0;i<4;i++)
 			{
-				state.agent_direction = ((state.agent_direction-1) % 4);
-				if (state.agent_direction<0) 
-					state.agent_direction +=4;
-				state.agent_last_action=state.ACTION_TURN_LEFT;
-				return LIUVacuumEnvironment.ACTION_TURN_LEFT;
-				//return NoOpAction.NO_OP;
+				if (next[i] == state.UNKNOWN) 
+					containsUnknown = true;
 			}
-			else if (home && returnhome)
-			{
-				state.agent_last_action=state.ACTION_NONE;
-				return NoOpAction.NO_OP;
-			}
-			else
-			{
-				/*
-				int next = 0;
-				switch (state.agent_direction) {
-				case MyAgentState.NORTH:
-					next = state.world[state.agent_x_position][state.agent_y_position-1];
-					break;
-				case MyAgentState.EAST:
-					next = state.world[state.agent_x_position+1][state.agent_y_position];
-					break;
-				case MyAgentState.SOUTH:
-					next = state.world[state.agent_x_position][state.agent_y_position+1];
-					break;
-				case MyAgentState.WEST:
-					next = state.world[state.agent_x_position-1][state.agent_y_position];
-					break;
-				}
-				if (next == state.UNKNOWN){
+
+			//If the west neighbour is unknown, either go forward if pointing west, or turn to the west
+			if (next[state.WEST]==state.UNKNOWN){
+				if (state.agent_direction == state.WEST){
 					state.agent_last_action=state.ACTION_MOVE_FORWARD;
 					return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
 				}
 				else{
-					state.agent_direction = ((state.agent_direction-1) % 4);
-					if (state.agent_direction<0) 
-						state.agent_direction +=4;
-					state.agent_last_action=state.ACTION_TURN_LEFT;
-					return LIUVacuumEnvironment.ACTION_TURN_LEFT;
-				}*/
-				
-				/*if(returnhome)
-				{
-					if(state.agent_direction != state.NORTH)
-					{
-						
+					if (state.agent_direction > state.NORTH){
+						state.agent_direction = ((state.agent_direction+1) % 4);
+						state.agent_last_action=state.ACTION_TURN_RIGHT;
+						return LIUVacuumEnvironment.ACTION_TURN_RIGHT;
 					}
-					if(state.agent_x_position-1 > 0)
-					{
-						
-					}
-						
-				}*/
-
-				int[] next = {0,0,0,0};
-				next[0] = state.world[state.agent_x_position][state.agent_y_position-1];
-				next[1] = state.world[state.agent_x_position+1][state.agent_y_position];
-				next[2] = state.world[state.agent_x_position][state.agent_y_position+1];
-				next[3] = state.world[state.agent_x_position-1][state.agent_y_position];
-
-				boolean containsUnknown = false;
-				for(int i=0;i<4;i++){
-					if (next[i] == state.UNKNOWN) 
-						containsUnknown = true;
-				}
-				if (next[state.WEST]==state.UNKNOWN){
-					if (state.agent_direction == state.WEST){
-						state.agent_last_action=state.ACTION_MOVE_FORWARD;
-						return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
-					}
-					// TODO implement turn right if dir < than something shortest turn dir
-					else{
-						if (state.agent_direction > state.NORTH){
-							state.agent_direction = ((state.agent_direction+1) % 4);
-							state.agent_last_action=state.ACTION_TURN_RIGHT;
-							return LIUVacuumEnvironment.ACTION_TURN_RIGHT;
-						}
-						else{
-							state.agent_direction = ((state.agent_direction-1) % 4);
-							if (state.agent_direction<0) 
-								state.agent_direction +=4;
-							state.agent_last_action=state.ACTION_TURN_LEFT;
-							return LIUVacuumEnvironment.ACTION_TURN_LEFT;
-						}
-					}
-				}
-				else if (next[state.SOUTH]==state.UNKNOWN){
-					if (state.agent_direction == state.SOUTH){
-						state.agent_last_action=state.ACTION_MOVE_FORWARD;
-						return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
-					}
-					// TODO implement turn right if dir < than something shortest turn dir
-					else{
-						if (state.agent_direction>state.SOUTH){
-							state.agent_direction = ((state.agent_direction-1) % 4);
-							if (state.agent_direction<0) 
-								state.agent_direction +=4;
-							state.agent_last_action=state.ACTION_TURN_LEFT;
-							return LIUVacuumEnvironment.ACTION_TURN_LEFT;
-						}
-						else{
-							state.agent_direction = ((state.agent_direction+1) % 4);
-							state.agent_last_action=state.ACTION_TURN_RIGHT;
-							return LIUVacuumEnvironment.ACTION_TURN_RIGHT;
-						}
-					}
-				}
-				else if (next[state.NORTH]==state.UNKNOWN){
-					if (state.agent_direction == state.NORTH){
-						state.agent_last_action=state.ACTION_MOVE_FORWARD;
-						return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
-					}
-					// TODO implement turn right if dir < than something shortest turn dir
 					else{
 						state.agent_direction = ((state.agent_direction-1) % 4);
 						if (state.agent_direction<0) 
@@ -371,90 +278,120 @@ class MyAgentProgram implements AgentProgram {
 						return LIUVacuumEnvironment.ACTION_TURN_LEFT;
 					}
 				}
-				else if (next[state.EAST]==state.UNKNOWN){
-					if (state.agent_direction == state.EAST){
-						state.agent_last_action=state.ACTION_MOVE_FORWARD;
-						return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
+			}
+			//If the south neighbour is unknown, either go forward if pointing south, or turn to the south
+			else if (next[state.SOUTH]==state.UNKNOWN){
+				if (state.agent_direction == state.SOUTH){
+					state.agent_last_action=state.ACTION_MOVE_FORWARD;
+					return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
+				}
+				else{
+					if (state.agent_direction>state.SOUTH){
+						state.agent_direction = ((state.agent_direction-1) % 4);
+						if (state.agent_direction<0) 
+							state.agent_direction +=4;
+						state.agent_last_action=state.ACTION_TURN_LEFT;
+						return LIUVacuumEnvironment.ACTION_TURN_LEFT;
 					}
-					// TODO implement turn right if dir < than something shortest turn dir
 					else{
-						if(state.agent_direction <state.EAST){
-							state.agent_direction = ((state.agent_direction+1) % 4);
-							state.agent_last_action=state.ACTION_TURN_RIGHT;
-							return LIUVacuumEnvironment.ACTION_TURN_RIGHT;
-						}
-						else{
-							state.agent_direction = ((state.agent_direction-1) % 4);
-							if (state.agent_direction<0) 
-								state.agent_direction +=4;
-							state.agent_last_action=state.ACTION_TURN_LEFT;
-							return LIUVacuumEnvironment.ACTION_TURN_LEFT;
-						}
+						state.agent_direction = ((state.agent_direction+1) % 4);
+						state.agent_last_action=state.ACTION_TURN_RIGHT;
+						return LIUVacuumEnvironment.ACTION_TURN_RIGHT;
 					}
 				}
-				else if (next[state.agent_direction] == state.UNKNOWN){
+			}
+			//If the north neighbour is unknown, either go forward if pointing north, or turn to the north
+			else if (next[state.NORTH]==state.UNKNOWN){
+				if (state.agent_direction == state.NORTH){
 					state.agent_last_action=state.ACTION_MOVE_FORWARD;
 					return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
 				}
-				/*else if (containsUnknown){
-					state.agent_direction = ((state.agent_direction+1) % 4);
-					if (state.agent_direction<0) 
-						state.agent_direction +=4;
-					state.agent_last_action=state.ACTION_TURN_RIGHT;
-					return LIUVacuumEnvironment.ACTION_TURN_RIGHT;
-				}*/
-				else if(next[state.agent_direction] == state.WALL){
-					Random ran = new Random();
-					int randy = ran.nextInt(2);
-					if(randy==0) {
+				else{
+					if (state.agent_direction>state.SOUTH){
+						state.agent_direction = ((state.agent_direction+1) % 4);
+						state.agent_last_action=state.ACTION_TURN_RIGHT;
+						return LIUVacuumEnvironment.ACTION_TURN_RIGHT;
+					}
+					else{
 						state.agent_direction = ((state.agent_direction-1) % 4);
 						if (state.agent_direction<0) 
 							state.agent_direction +=4;
-						state.agent_last_action = state.ACTION_TURN_LEFT;
+						state.agent_last_action=state.ACTION_TURN_LEFT;
 						return LIUVacuumEnvironment.ACTION_TURN_LEFT;
-					} 
-					else 
-					{
+					}
+				}
+			}
+			//If the east neighbour is unknown, either go forward if pointing east, or turn to the east
+			else if (next[state.EAST]==state.UNKNOWN){
+				if (state.agent_direction == state.EAST){
+					state.agent_last_action=state.ACTION_MOVE_FORWARD;
+					return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
+				}
+				else{
+					if(state.agent_direction <state.EAST){
 						state.agent_direction = ((state.agent_direction+1) % 4);
-						state.agent_last_action = state.ACTION_TURN_RIGHT;
+						state.agent_last_action=state.ACTION_TURN_RIGHT;
 						return LIUVacuumEnvironment.ACTION_TURN_RIGHT;
-					} 
-					
-					/*state.agent_direction = ((state.agent_direction-1) % 4);
+					}
+					else{
+						state.agent_direction = ((state.agent_direction-1) % 4);
+						if (state.agent_direction<0) 
+							state.agent_direction +=4;
+						state.agent_last_action=state.ACTION_TURN_LEFT;
+						return LIUVacuumEnvironment.ACTION_TURN_LEFT;
+					}
+				}
+			}
+			//If about to walk in to wall, turn in random direction
+			else if(next[state.agent_direction] == state.WALL)
+			{
+				Random ran = new Random();
+				int randy = ran.nextInt(2);
+				if(randy==0) {
+					state.agent_direction = ((state.agent_direction-1) % 4);
 					if (state.agent_direction<0) 
 						state.agent_direction +=4;
-					state.agent_last_action=state.ACTION_TURN_LEFT;
-					return LIUVacuumEnvironment.ACTION_TURN_LEFT;*/
-				}
-				else
+					state.agent_last_action = state.ACTION_TURN_LEFT;
+					return LIUVacuumEnvironment.ACTION_TURN_LEFT;
+				} 
+				else 
 				{
-					Random ran = new Random();
-					int randy = ran.nextInt(6);
-					if(randy==0) {
-						state.agent_direction = ((state.agent_direction-1) % 4);
-						if (state.agent_direction<0) 
-							state.agent_direction +=4;
-						state.agent_last_action = state.ACTION_TURN_LEFT;
-						return LIUVacuumEnvironment.ACTION_TURN_LEFT;
-					} 
-					else if(randy==1)
-					{
-						state.agent_direction = ((state.agent_direction+1) % 4);
-						state.agent_last_action = state.ACTION_TURN_RIGHT;
-						return LIUVacuumEnvironment.ACTION_TURN_RIGHT;
-					} 
-					else
-					{
-					state.agent_last_action=state.ACTION_MOVE_FORWARD;
-					return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
-					}
-				}
-
+					state.agent_direction = ((state.agent_direction+1) % 4);
+					state.agent_last_action = state.ACTION_TURN_RIGHT;
+					return LIUVacuumEnvironment.ACTION_TURN_RIGHT;
+				} 
 
 			}
+			//If clear around and no wall, go forward or turn randomly
+			else
+			{
+				Random ran = new Random();
+				int randy = ran.nextInt(6);
+				if(randy==0) {
+					state.agent_direction = ((state.agent_direction-1) % 4);
+					if (state.agent_direction<0) 
+						state.agent_direction +=4;
+					state.agent_last_action = state.ACTION_TURN_LEFT;
+					return LIUVacuumEnvironment.ACTION_TURN_LEFT;
+				} 
+				else if(randy==1)
+				{
+					state.agent_direction = ((state.agent_direction+1) % 4);
+					state.agent_last_action = state.ACTION_TURN_RIGHT;
+					return LIUVacuumEnvironment.ACTION_TURN_RIGHT;
+				} 
+				else //probability 2/3 to go straight
+				{
+					state.agent_last_action=state.ACTION_MOVE_FORWARD;
+					return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
+				}
+			}
+
+
 		}
 	}
 }
+
 
 public class MyVacuumAgent extends AbstractAgent {
 	public MyVacuumAgent() {
