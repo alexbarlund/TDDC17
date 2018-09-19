@@ -61,13 +61,52 @@ public class CustomGraphSearch implements SearchObject {
 		 * 
 		 * -To get the child states (adjacent grid positions that are not walls) of a particular search node, do: ArrayList<GridPos> childStates = p.getReachableStatesFrom(currentState);
 		 * 
-		 * -Depending on the addNodesToFront boolean variable, you may need to do something with the frontier... (see book)
+		 * -Depending on the addNodesToFront (insertfront?) boolean variable, you may need to do something with the frontier... (see book)
 		 * 
 		 * -You can check if you have reached the goal with p.isGoalState(NodeState)
 		 * 
 		 *  When the goal is found, the path to be returned can be found by: path = node.getPathFromRoot();
 		 */
 		/* Note: Returning an empty path signals that no path exists */
+		
+		
+		while(true)
+		{	
+			//if all nodes searched, then we dun (failure)
+			if(frontier.isEmpty())
+			{
+				break; //maybe
+			}
+
+			SearchNode parent = frontier.removeFirst();
+
+			if(p.isGoalState(parent.getState()))
+			{
+				path = parent.getPathFromRoot(); 
+				break;
+			}
+			
+			explored.add(parent);
+			
+			ArrayList<GridPos> childStates = p.getReachableStatesFrom(parent.getState());
+			for(int i = 0; i < childStates.size(); i++)
+			{
+				SearchNode childNode = new SearchNode(childStates.get(i),parent);
+				if(!explored.contains(childNode) && !frontier.contains(childNode))
+				{
+					if(insertFront)
+					{
+						frontier.addNodeToFront(childNode);
+					}
+					else
+					{
+						frontier.addNodeToBack(childNode);
+					}
+				}
+				
+			}	
+		}
+		
 		return path;
 	}
 
