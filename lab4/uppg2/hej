@@ -1,0 +1,11 @@
+/home/TDDC17/sw/fdlog/fast-downward.py domain.pddl p02.pddl --heuristic 'hff=ff()' --search 'eager_greedy([hff])' --log-file p02_ff
+
+/home/TDDC17/sw/fdlog/fast-downward.py domain.pddl p02.pddl --heuristic 'gc=goalcount()' --search 'eager_greedy([gc])' --log-file p02_gc
+
+/home/TDDC17/sw/fdlog/fast-downward.py domain.pddl p02.pddl --heuristic 'gc=goalcount()' --heuristic 'hff=ff()' --search 'eager_greedy([gc], preferred=[hff], boost=256)' --log-file p02_gc_ff
+
+/home/TDDC17/sw/fdlog/fast-downward.py domain.pddl p03.pddl --heuristic 'hff=ff()' --search 'eager_greedy([hff])' --log-file p03_ff
+
+/home/TDDC17/sw/fdlog/fast-downward.py domain.pddl p03.pddl --heuristic 'gc=goalcount()' --search 'eager_greedy([gc])' --log-file p03_gc
+
+/home/TDDC17/sw/fdlog/fast-downward.py domain.pddl p03.pddl --heuristic 'gc=goalcount()' --heuristic 'hff=ff()' --search 'eager_greedy([gc], preferred=[hff], boost=256)' --log-file p03_gc_ff
