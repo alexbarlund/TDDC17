@@ -51,9 +51,9 @@ public class StateAndReward {
 
 		/* TODO: IMPLEMENT THIS FUNCTION */
 		
-		int angle_state = discretize2(angle, 15, -3.1415, 3.1415);
-		int vx_state = discretize(vx, 9, -2, 2);
-		int vy_state = discretize(vy, 7, -2, 2);
+		int angle_state = discretize2(angle, 11, -3.1415, 3.1415);
+		int vx_state = discretize(vx, 7, -2, 2);
+		int vy_state = discretize(vy, 5, -2, 2);
 
 		String state = "A"+angle_state + "VX" + vx_state + "VY" + vy_state;
 		
@@ -67,13 +67,13 @@ public class StateAndReward {
 		
 		double reward = 0;
 		
-		int angle_state = discretize2(angle, 15, -3.1415, 3.1415);
-		int vx_state = discretize(vx, 9, -2, 2);
-		int vy_state = discretize(vy, 7, -2, 2);
+		int angle_state = discretize2(angle, 11, -3, 3);
+		int vx_state = discretize(vx, 7, -2, 2);
+		int vy_state = discretize(vy, 5, -2, 2);
 		
-		reward = -4*Math.abs(7 - angle_state)
-				 -Math.abs(3 - vx_state)
-				 -Math.abs(2.9 - vy_state);
+		reward = (7-Math.abs(5 - angle_state))
+				 + (5-Math.abs(3 - vx_state))
+				 + (5-Math.abs(2 - vy_state));
 		
 
 		return reward;
